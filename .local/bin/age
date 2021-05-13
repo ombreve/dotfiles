@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# age: a minimal version control tool
+
+agedir=./.ages
+
+usage() {
+    echo "usage: ${0##*/} [-hn]"
+}
+help() {
+  usage
+  cat <<'EOF'
+Copies files to a backup directory under the current directory.
+Options:
+  -h    Print this message and exit.
+  -n    Don't actually run any commands; just print them.
+EOF
+}
+
+set -o errexit -o errtrace -o pipefail
+cmdecho() {
+  echo "${0##*/}: $@"
+}
+
+while getopts ":hn" opt
+do
+  case "$opt" in
+    h)
+      help
+      exit 0
+      ;;
+    n)
+      dryrun=echo
+      ;;
+    \?)
+      cmdecho "illegal option -- $OPTARG" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [[ ! -d "$agedir" ]]
+then
+  $dryrun mkdir $agedir
+fi
+
+timestamp=$(date '+%y%m%d%H%M')
+if [[ -z "$dryrun" ]]
+then
+  find . -maxdepth 1 -type f -print0 |
+    tar --null -z -c -f "$agedir/${PWD##*/}-${timestamp}.tar.gz" -T -
+else
+  echo -n "find . -maxdepth 1 -type f -print0 | "
+  echo "tar --null -z -c -f $agedir/${PWD##*/}-${timestamp}.tar.gz -T -"
+fi
+

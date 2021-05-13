@@ -1,0 +1,27 @@
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+export PATH="$HOME/.local/bin:$PATH"
+
+export HISTCONTROL=erasedups
+
+export GOPATH="$HOME/.local/go"
+export GOBIN="$HOME/.local/bin"
+
+export AT="$HOME/Documents/Atelier"
+export PU="$HOME/Documents/Purgatiroir"
+
+umask 022
+
+alias l='ls -FhH'
+alias ll='l -l'
+alias la='l -ial'
+alias j='jobs'
+alias d='dirs'
+alias pu='pushd'
+alias po='popd'
+alias lm='latexmk'
+alias dots='git --git-dir=$AT/comp/dotfiles.git --work-tree=$HOME'
+alias rmdstore='find . -name ".DS_Store" -depth -exec rm {} \;'
+
+PS1='$ '
+

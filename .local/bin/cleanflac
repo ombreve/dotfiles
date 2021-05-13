@@ -1,0 +1,162 @@
+#!/usr/bin/env bash
+# cleanflac : clean album flac files metadata
+# All alphabetically ordered *.flac files in current dir
+# will be tied to the same album and renamed if needed
+
+usage() {
+    echo "usage: ${0##*/} [-hn]"
+}
+help() {
+  usage
+  cat <<'EOF'
+Edit a minimum set of tags of all the flac files in current directory
+to group them in the same album. The album art can also be changed.
+Options:
+  -n    Don't actually run any commands; just print them.
+  -h    Print this message and exit.
+EOF
+}
+
+set -o errexit -o errtrace -o pipefail
+cmdecho() {
+  echo "${0##*/}: $@"
+}
+
+while getopts ":hn" opt
+do
+  case "$opt" in
+    h)
+      help
+      exit 0
+      ;;
+    n)
+      dryrun=echo
+      ;;
+    \?)
+      cmdecho "illegal option -- $OPTARG" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+# The tags we keep, not counting tracknumber
+album=
+artist=
+performer=
+genre=
+date=
+comment=
+titles=()
+tracktotal=0
+
+# Album art
+picture=folder.jpg
+
+TMPFILE=/tmp/cleanflac.$$
+cleanup()
+{
+  rm -f $TMPFILE $picture
+  exit 0
+}
+trap cleanup 0 1 2 3 6
+
+if ! ls *.flac >/dev/null 2>&1
+then
+  cmdecho "cannot find flac files" >&2
+  exit 1
+fi
+
+for f in *.flac
+do
+  if (( tracktotal == 0 ))
+  then
+    eval $(metaflac --list --block-type=VORBIS_COMMENT "$f" |
+      sed -n '
+        s/'"'"'/'"'"'"'"'"'"'"'"'/g
+        s/^.* ALBUM=\(.*\)$/album='"'"'\1'"'"'/p
+        s/^.* ARTIST=\(.*\)$/artist='"'"'\1'"'"'/p
+        s/^.* PERFORMER=\(.*\)$/performer='"'"'\1'"'"'/p
+        s/^.* GENRE=\(.*\)$/genre='"'"'\1'"'"'/p
+        s/^.* DATE=\(.*\)$/date='"'"'\1'"'"'/p
+        s/^.* COMMENT=\(.*\)$/comment='"'"'\1'"'"'/p
+        s/^.* TITLE=\(.*\)$/titles=('"'"'\1'"'"')/p' |
+      tr '\n' ' ')
+    [[ -f $picture ]] || $dryrun metaflac --export-picture-to=$picture "$f" \
+      || true
+  else
+    titles[$tracktotal]="$(metaflac --show-tag=TITLE "$f" | sed 's/TITLE=//')"
+  fi
+  tracktotal=$((tracktotal+1))
+done
+
+( echo "# Propriétés de l'album"
+  echo
+  echo "ALBUM = $album"
+  echo "ARTIST = $artist"
+  echo "PERFORMER = $performer"
+  echo "GENRE = $genre"
+  echo "DATE = $date"
+  echo "COMMENT = $comment"
+  echo
+  echo "# Titres des pistes"
+  echo
+  for ((i=0 ; i < tracktotal ; i++))
+  do
+    printf '%02d ' $((i+1))
+    echo ${titles[$i]}
+  done
+  echo
+  echo "# You may uncomment and ^Z check the album art in $picture"
+  echo "#UPDATE_PICTURE"
+) >$TMPFILE
+
+vi $TMPFILE
+printf  "clean flac files ([y]/n)? "
+read answer
+if [[ -z "$answer" || "$answer" != "${answer##[yY]}" ]]
+then
+  i=1
+  for f in *.flac
+  do
+    j=$(printf "%02d" $i)
+    title=$(sed -n 's/^'"$j"' //p' $TMPFILE)
+    $dryrun chmod 644 "$f"
+    $dryrun metaflac --remove-all-tags "$f"
+    ( sed '
+        /^#/d
+        /^[ \t]*$/d
+        /^[0-9]/d
+        /^UPDATE_PICTURE/d
+        /^[^=]*=[ \t]*$/d
+        s/ = /=/
+        ' $TMPFILE
+      echo "TITLE=$title"
+      echo "TRACKNUMBER=$i"
+      echo "TRACKTOTAL=$tracktotal"
+    ) |
+      if [[ -n "$dryrun" ]]
+      then
+        cat
+      else
+        metaflac --import-tags-from=- "$f"
+      fi
+
+    if grep '^UPDATE_PICTURE' $TMPFILE >/dev/null 2>&1
+    then
+      $dryrun metaflac --remove --block-type=PICTURE "$f"
+      $dryrun metaflac "--import-picture-from=$picture" "$f"
+    fi
+    $dryrun chmod 444 "$f"
+
+    filename=$(printf '%s-%s.flac' $j "$title" |
+      tr -s '()[]{}~#%&<>:;"/\|?* '"'" '_')
+    if [[ "$f" != "$filename" ]]
+    then
+      $dryrun mv -v "$f" "$filename"
+    fi
+
+    i=$((i+1))
+  done
+fi
+
