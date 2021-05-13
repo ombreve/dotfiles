@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# backup : archive personal data
+
+usage() {
+    echo "usage: ${0##*/} [-ha] destdir"
+}
+help() {
+  usage
+  cat <<'EOF'
+Backup personal data to given directory. Note that extraneous files
+from destination directory are deleted.
+Options:
+  -h    Print this message and exit.
+  -a    Actually backup files: by default it only prints changes that
+        would occur.
+EOF
+}
+
+set -o errexit -o errtrace -o pipefail
+cmdecho() {
+  echo "${0##*/}: $@"
+}
+
+dryrun=-n
+while getopts ":ha" opt
+do
+  case "$opt" in
+    h)
+      help
+      exit 0
+      ;;
+    a)
+      dryrun=
+      ;;
+    \?)
+      cmdecho "illegal option -- $OPTARG" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
+if [[ -z "$1" ]]
+then
+  cmdecho "bad arguments number" >&2
+  usage >&2
+  exit 1
+fi
+
+if [[ ! -d "$1" ]]
+then
+  cmdecho "destination directory $1 does not exist" >&2
+  exit 1
+fi
+
+cmdecho "destination directory is ${1%/}"
+if [[ -n "$dryrun" ]]
+then
+  cmdecho "dry run: use option -a to proceed"
+fi
+
+cd $HOME
+# The -L option that is needed for Atelier/qrm
+rsync -aLCv $dryrun --delete --exclude=.Trash --exclude=.DS_Store \
+  Atelier "${1%/}"
+
+cd $HOME/iCloud
+rsync -aCv $dryrun --delete --exclude=.Trash --exclude=.DS_Store \
+  --exclude=Musique/Pistes Archives "${1%/}"
+rsync -aCv $dryrun --delete --exclude=.Trash --exclude=.DS_Store \
+  Ombrêve "${1%/}"
+rsync -aCv $dryrun --delete --exclude=.Trash --exclude=.DS_Store \
+  Purgatiroir "${1%/}"
+
+cd $HOME/Archives/Musique
+rsync -aCv $dryrun --delete --exclude=.Trash --exclude=.DS_Store \
+  Pistes "${1%/}/Archives/Musique"
+
