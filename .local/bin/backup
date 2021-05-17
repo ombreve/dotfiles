@@ -60,19 +60,15 @@ then
 fi
 
 cd $HOME
-# The -L option that is needed for Atelier/qrm
-rsync -aLCv $dryrun --delete --exclude=.Trash --exclude=.DS_Store \
+rsync -aCv $dryrun --delete --exclude=.Trash --exclude=.DS_Store \
   Atelier "${1%/}"
 
-cd $HOME/iCloud
 rsync -aCv $dryrun --delete --exclude=.Trash --exclude=.DS_Store \
-  --exclude=Musique/Pistes Archives "${1%/}"
+  Archives "${1%/}"
+
 rsync -aCv $dryrun --delete --exclude=.Trash --exclude=.DS_Store \
   Ombrêve "${1%/}"
+
 rsync -aCv $dryrun --delete --exclude=.Trash --exclude=.DS_Store \
   Purgatiroir "${1%/}"
-
-cd $HOME/Archives/Musique
-rsync -aCv $dryrun --delete --exclude=.Trash --exclude=.DS_Store \
-  Pistes "${1%/}/Archives/Musique"
 
