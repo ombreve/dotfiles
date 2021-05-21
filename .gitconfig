@@ -3,3 +3,5 @@
 	email = lnl.vidal@gmail.com
 [core]
 	editor = vi
+[init]
+	defaultBranch = master
