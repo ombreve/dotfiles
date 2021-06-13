@@ -1,32 +1,40 @@
-" Vim configuration file
+" Vim minimal configuration file
 
 set nocompatible
 
 filetype plugin indent on
 
-set autoindent
-set background=dark
-set backspace=indent,eol,start
 set encoding=utf-8
+set spelllang=fr,en
+
+set backspace=indent,eol,start
+set nobackup
+
+set autoindent
+set shiftwidth=2
+set shiftround
+set textwidth=0
+
 set ignorecase
+set smartcase
 set incsearch
+
 set list
 set listchars=tab:>\ ,trail:-,extends:>,precedes:<,nbsp:+
-set modeline
-set modelines=5
-set nobackup
 set ruler
-set shiftround
-set shiftwidth=2
-set smartcase
-set spelllang=fr,en
-set textwidth=77
-set visualbell
+set display=lastline
 set wildmenu
+set visualbell
 
+set background=dark
+let loaded_matchparen = 1
+
+nnoremap <C-J> <C-w>w
+nnoremap <C-K> <C-w>W
 inoremap <C-U> <C-G>u<C-U>
 
-autocmd FileType c,cpp setl et sts=4 sw=4 tw=80
+autocmd FileType text setl tw=66
+autocmd FileType c,cpp setl et nu sts=4 sw=4 tw=80
 
 let g:grammalecte_cli_py='$HOME/.local/lib/Grammalecte-fr-v2/grammalecte-cli.py'
 let g:grammalecte_disable_rules =
