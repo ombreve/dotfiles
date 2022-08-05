@@ -115,7 +115,8 @@ autocmd FileType text
   \ lnoremap <buffer> _ —
 
 autocmd FileType tex,plaintex
-  \ setl et sw=2 tw=77
+  \ setl et list sw=2 tw=77 |
+  \ let b:tex_stylish= 1
 
 autocmd FileType c,cpp
   \ setl et sts=4 sw=4 tw=80
