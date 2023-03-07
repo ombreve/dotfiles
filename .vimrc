@@ -1,18 +1,12 @@
 " Section: Bootstrap
 
 if v:version < 800 | finish | endif
-if $VIM_BARE | set noloadplugins | finish | endif
 
 set nocompatible
 set pastetoggle=<F2>
 set modelines=5
 
 filetype plugin indent on
-
-nmap <script><silent> <Space> :call getchar()<CR>
-nmap <C-@> <Space>
-nmap <Space>r :so ~/.vimrc<Bar>filetype detect<Bar>doau VimEnter -<CR>
-
 exe 'augroup my'
 autocmd!
 
@@ -116,7 +110,7 @@ autocmd FileType text
 
 autocmd FileType tex,plaintex
   \ setl et list sw=2 tw=77 |
-  \ let b:tex_stylish= 1
+  \ let b:tex_stylish=1
 
 autocmd FileType c,cpp
   \ setl et sts=4 sw=4 tw=80
@@ -143,37 +137,58 @@ syntax enable
 
 " git clone https://tpope.io/vim/repeat.git
 
-" git clone https://tpope.io/vim/fugitive.git
-" vim -u NONE -c "helptags fugitive/doc" -c q
+" git clone https://github.com/tpope/vim-fugitive.git
+" vim -u NONE -c "helptags vim-fugitive/doc" -c q
 
 " git clone https://tpope.io/vim/commentary.git
 " vim -u NONE -c "helptags commentary/doc" -c q
 
+" https://github.com/tpope/vim-surround.git
+" vim -u NONE -c "helptags vim-surround/doc" -c q
+
+" git clone https://github.com/tommcdo/vim-exchange
+" vim -u NONE -c "helptags vim-exchange/doc" -c q
+
 " git clone https://github.com/dpelle/vim-Grammalecte.git
 " vim -u NONE -c "helptags vim-Grammalecte/doc" -c q
-let g:grammalecte_cli_py =
+let g:grammalecte_cli_py=
   \ '$HOME/.local/lib/Grammalecte-fr-v2/grammalecte-cli.py'
-let g:grammalecte_disable_rules = 
+let g:grammalecte_disable_rules= 
   \   'espaces_début_ligne espaces_milieu_ligne espaces_fin_de_ligne '
   \ . 'esp_début_ligne esp_milieu_ligne esp_fin_ligne esp_mélangés2 '
   \ . 'typo_guillemet_simple_fermant_non_ouvert typo_signe_moins '
   \ . 'nbsp_après_tiret1'
 
+" git clone https://github.com/junegunn/limelight.vim.git
+
+" git clone https://github.com/junegunn/goyo.vim.git
+" vim -u NONE -c "helptags goyo.vim/doc" -c q
+function! s:goyo_enter()
+  setlocal scrolloff=999
+  Limelight
+endfunction
+function! s:goyo_leave()
+  setlocal scrolloff=1
+  Limelight!
+endfunction
+autocmd! User GoyoEnter nested call s:goyo_enter()
+autocmd! User GoyoLeave nested call s:goyo_leave()
+
+" git clone https://github.com/zaid/vim-rec.git
+" vim -u NONE -c "helptags vim-rec/doc" -c q
+
 " mkdir -p ~/.vim/pack/others/opt
 " cd ~/.vim/pack/others/opt
 
 " git clone https://github.com/lifepillar/vim-solarized8.git
-let g:solarized_italics = 0
+let g:solarized_italics=0
+function! s:tweak_solarized()
+  highlight SpecialKey guifg=#657b83 guibg=NONE gui=NONE cterm=NONE
+endfunction
+autocmd! ColorScheme solarized8 call s:tweak_solarized()
 silent! colorscheme solarized8
-highlight SpecialKey guifg=#657b83 guibg=NONE gui=NONE cterm=NONE
-
-" Section: Misc
 
 " Section: End
-
-if filereadable(expand('~/.vimrc.local'))
-  source ~/.vimrc.local
-endif
 
 exe 'augroup END'
 
