@@ -25,3 +25,4 @@ alias rmdstore='find . -name ".DS_Store" -depth -exec rm {} \;'
 
 PS1='$ '
 
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash

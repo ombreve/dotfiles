@@ -31,7 +31,7 @@ set display=lastline
 set scrolloff=1
 set lazyredraw
 
-let &g:listchars = "tab:\u21e5\u00b7,trail:\u2423,nbsp:\u00b7"
+let &g:listchars = "tab:\u21e5\u00b7,trail:\u2423,nbsp:\u2423"
 let &g:fillchars = "fold:\u00b7"
 
 " Section: Windows
@@ -75,6 +75,7 @@ set foldopen+=jump
 " Section: Maps
 
 inoremap <C-U> <C-G>u<C-U>
+call digraph_set('  ', ' ')
 
 " Section: Reading and writing files
 
@@ -106,7 +107,8 @@ autocmd FileType text
   \ inoremap <buffer> : :<C-G>u|
   \ inoremap <buffer> <C-W> <C-G>u<C-W>|
   \ lnoremap <buffer> ' ’|
-  \ lnoremap <buffer> _ —
+  \ lnoremap <buffer> _ —|
+  \ lnoremap <buffer> =  |
 
 autocmd FileType tex,plaintex
   \ setl et list sw=2 tw=77 |
@@ -174,16 +176,15 @@ endfunction
 autocmd! User GoyoEnter nested call s:goyo_enter()
 autocmd! User GoyoLeave nested call s:goyo_leave()
 
-" git clone https://github.com/zaid/vim-rec.git
-" vim -u NONE -c "helptags vim-rec/doc" -c q
-
 " mkdir -p ~/.vim/pack/others/opt
 " cd ~/.vim/pack/others/opt
 
 " git clone https://github.com/lifepillar/vim-solarized8.git
 let g:solarized_italics=0
 function! s:tweak_solarized()
-  highlight SpecialKey guifg=#657b83 guibg=NONE gui=NONE cterm=NONE
+  highlight clear SpecialKey
+  highlight MyFIS guifg=#657b83 guibg=NONE gui=NONE cterm=NONE
+  match MyFIS / /
 endfunction
 autocmd! ColorScheme solarized8 call s:tweak_solarized()
 silent! colorscheme solarized8
