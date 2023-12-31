@@ -1,4 +1,4 @@
-eval "$(/opt/homebrew/bin/brew shellenv)"
+[[ -f /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
 
 export PATH="$HOME/.local/bin:$PATH"
 
@@ -8,6 +8,7 @@ export GOPATH="$HOME/.local/go"
 export GOBIN="$HOME/.local/bin"
 
 export AT="$HOME/Documents/Atelier"
+export AR="$HOME/Documents/Archives"
 export PU="$HOME/Documents/Purgatiroir"
 
 umask 022
@@ -25,4 +26,4 @@ alias rmdstore='find . -name ".DS_Store" -depth -exec rm {} \;'
 
 PS1='$ '
 
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+[[ -f ~/.fzf.bash ]] && source ~/.fzf.bash
